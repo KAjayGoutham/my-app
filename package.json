@@ -4,6 +4,9 @@
   "version": "1.0.0",
   "description": "My Electron application description",
   "main": "src/index.js",
+  "browser":{
+    "fs":false
+  },
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
@@ -20,7 +23,8 @@
     "@electron-forge/plugin-auto-unpack-natives": "^7.3.0",
     "@electron-forge/plugin-fuses": "^7.3.0",
     "@electron/fuses": "^1.7.0",
-    "electron": "29.1.4"
+    "electron": "29.1.4",
+    "electron-builder": "^24.13.3"
   },
   "keywords": [],
   "author": {

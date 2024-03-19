@@ -3,7 +3,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const dynamicTable = document.getElementById("table-body");
   const dynamicList = document.getElementById("test-name");
   const { ipcRenderer } = require("electron");
-  const directoryPath = "E:/playwright/tests"; // Specify the directory path
+  const directoryPath = "E:/playwright/tests"; // Specify the directory path example : E:/playwright/tests
   ipcRenderer.send("readDirectory", directoryPath);
   ipcRenderer.on("directoryContents", (event, files) => {
     console.log("Files in directory:", files);
@@ -19,25 +19,39 @@ window.addEventListener("DOMContentLoaded", () => {
       fileObj.push(mainobj);
     }
     //console.log(fileObj);
+
     for (let i = 0; i <= fileObj.length; i++) {
       const row = document.createElement("tr");
+      row.className = "tableDataRows";
       let runButton = document.createElement("button");
+      runButton.className = "runbutton";
       for (const key in fileObj[i]) {
         const cell = document.createElement("td");
-        if (key === "execute" || key === "testFile") {
+        if (key === "execute") {
           //const runButton = document.createElement("button");
-          runButton.textContent = "Run";
+          runButton.textContent = "▶️";
+          cell.style.textAlign = "center";
           cell.appendChild(runButton);
           row.appendChild(cell);
-        } else if (key === "status" || key === "testFile") {
+        } else if (key === "status") {
           runButton.addEventListener("click", () => {
             let statusElement = document.createElement("td");
-            let executionPath = directoryPath.split("tests");
+            let executionPath = directoryPath.split("tests")[0];
+            //the below block is a temparory block to display loading or processing icon for status column
+            {
+              // const divloader = document.createElement("div");
+              // divloader.className = "loader";
+              // statusElement.appendChild(divloader);
+              // cell.appendChild(statusElement);
+              statusElement = "Loading...";
+              cell.textContent = statusElement;
+            }
+            console.log(executionPath);
             console.log(
-              `npx cross-env ENV=uat playwright test tests/${fileObj[i].tesFile}.test.ts --project=Chrome`
+              `npx playwright test tests/${fileObj[i].tesFile}.test.ts`
             );
             exec(
-              `npx cross-env ENV=uat playwright test tests/${fileObj[i].tesFile}.test.ts tests/${fileObj[i].tesFile}.spec.ts --project=Chrome`,
+              `npx playwright test tests/${fileObj[i].tesFile}.test.ts ${fileObj[i].tesFile}.spec.ts`,
               {
                 cwd: executionPath.toString(),
                 shell: "C:\\Windows\\System32\\cmd.exe",
@@ -45,13 +59,32 @@ window.addEventListener("DOMContentLoaded", () => {
               (error, stdout, stderr) => {
                 if (error) {
                   console.error(`Error executing command: ${error}`);
-                  return;
+                  //return;
                 }
                 console.log(`Command output: ${stdout}`);
+                const lines = stdout.split("\n");
+                if (stdout.includes("Finished the run: passed")) {
+                  // const lastLine = lines[lines.length - 7].toUpperCase();
+                  // statusElement = lastLine;
+                  statusElement = "Passed";
+                } else if (
+                  stdout.includes("Finished the run: failed") ||
+                  stdout.includes("failed")
+                ) {
+                  // const lastLine = lines[lines.length - 7].toUpperCase();
+                  // statusElement = lastLine;
+                  statusElement = "Failed";
+                } else if (stdout.includes("No tests found")) {
+                  statusElement =
+                    "No test found please check test command once";
+                } else {
+                  statusElement = stdout;
+                }
+                cell.textContent = statusElement;
               }
             );
-            statusElement = "passed"; // Example: Change the status to "Updated Status"
-            cell.textContent = statusElement; // Update the cell content with the new status
+            // Example: Change the status to "Updated Status"
+            // Update the cell content with the new status
             //row.style.backgroundColor = "green"; // Example: Change row color to green when button clicked
             try {
               cell.appendChild(statusElement);

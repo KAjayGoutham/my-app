@@ -13,10 +13,11 @@ const createWindow = () => {
     width: 800,
     height: 600,
     webPreferences: {
+      sandbox: false,
       contextIsolation: true,
       nodeIntegration: true,
-      sandbox: false,
-      webSecurity: false,
+      webSecurity: true,
+      allowRunningInsecureContent: true,
       preload: path.join(__dirname, "preload.js"),
     },
   });
